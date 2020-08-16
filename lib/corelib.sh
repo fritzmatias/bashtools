@@ -23,20 +23,20 @@ disableLogStack(){
 
 debug(){
 local stack=${FUNCNAME[*]}
-local filename=$(basename ${BASH_SOURCE[0]})
+local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
 [ "$LOGLEVEL" = "debug" ] && echo "[DEBUG: ${filename}] ${FUNCNAME[1]}: $@  $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
         return 0
 };export -f debug
 
 info(){
 local stack=${FUNCNAME[*]}
-local filename=$(basename ${BASH_SOURCE[0]})
+local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
         ([ "$LOGLEVEL" = "debug" ] || [ "$LOGLEVEL" = "info" ]) && echo "[INFO: ${filename}] ${FUNCNAME[1]}: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
         return 0
 };export -f info
 
 warn(){
-local filename=$(basename ${BASH_SOURCE[0]})
+local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
 local stack=${FUNCNAME[*]}
         ([ "$LOGLEVEL" = "debug" ] \
         || [ "$LOGLEVEL" = "info" ] \
@@ -49,10 +49,10 @@ error(){
 local err=$1; 
 local stack=${FUNCNAME[*]}
 local re='^-?[0-9]+$'
-local filename=$(basename ${BASH_SOURCE[0]})
+local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
 
 	[[ $err =~ $re ]] && shift || err=1
-        echo "[ERROR: ${filename}] ${FUNCNAME[-1]}: $@  ([STACK] ${stack// /:})" >&2
+        echo "[ERROR: ${filename}] ${FUNCNAME[1]}: $@  ([STACK] ${stack// /:})" >&2
         return $err
 };export -f error
 
@@ -60,10 +60,10 @@ fatal(){
 local err=$1;
 local stack=${FUNCNAME[*]}
 local re='^-?[0-9]+$'
-local filename=$(basename ${BASH_SOURCE[0]})
+local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
 
 	[[ $err =~ $re ]] && shift || err=1
-        echo "[FATAL: ${filename}] ${FUNCNAME[-1]}: Exit $err - $@ ([STACK] ${stack// /:})" >&2
+        echo "[FATAL: ${filename}] ${FUNCNAME[1]}: Exit $err - $@ ([STACK] ${stack// /:})" >&2
         exit $err
 };export -f fatal
 
@@ -89,7 +89,12 @@ testlog(){
  	info info message
 	warn warn message
 	error error message
-	warn fatal message is not tested
+	bash -c 'fatal 3 fatal message from terminal'
+	bash -c 'error 3 fatal message from terminal'
+	bash -c 'warn warn message from terminal'
+	bash -c 'info info message from terminal'
+	bash -c 'debug debug message from terminal'
+	return 0
 };export -f testlog
 
 functionsOf(){
