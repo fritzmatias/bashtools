@@ -51,8 +51,9 @@ local pendingPush=$(git rev-parse @{push}... 2>/dev/null| sed -e 's/\^//g' | sor
  
 ps1_showOrigin(){
 local origin=$(git remote get-url origin 2>/dev/null )
-local remote=$(echo ${origin} | sed -e 's/.*:\/\/\|www.\|\.\(com\|org\|gov\|edu\).*//g')
+local remote=$(echo $origin | sed -e 's/.*:\/\///g;s/\.[a-zA-Z0-9\/\.-]*//g')
 local baseName=$(basename ${origin} 2>/dev/null)
+require origin remote baseName
 	([ -z ${remote} ] && echo 'self') || (echo "${remote}" | egrep '^/|@' >/dev/null 2>&1 && echo "local/${baseName}") || echo "${remote}/${baseName}" 
 }
  
