@@ -29,11 +29,14 @@ Bash Tools are a set of functions & scripts to help me devolp bash scripts or ma
  - assert: validates the execution of a command. Note: some characters, like '"', must be escaped    
 
 ### Git 
- ![git_ps1 doc](./docs/git_ps1/README.md)
-
-
- repository information on the console prompt like: repo name, current branch, branch parity, sincronization status
+ repository information on the console prompt like: repo name, current branch, branch parity, sincronization status [more](./docs/git_ps1/README.md)
  - git_ps1 modifies the console prompt. It is better to be loaded in user bashrc
+
+ - what repository/branch are you working on and what branches are included in it.
+ ![screen example](./docs/git_ps1/git_ps1.png)
+
+ - when your local repository has push actions pending
+ ![unsync example](./docs/git_ps1/git_ps1_unsync.png)
 
 ### ~/.path loader
  - pathloader: adds all the paths on ~/.path to PATH variable. Use it on your ~/.bashrc
