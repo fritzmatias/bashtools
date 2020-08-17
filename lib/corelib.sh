@@ -5,7 +5,7 @@
 set -f #disables the * autocomplet
 
 
-[ "$LOGLEVEL"x = x ] && export LOGLEVEL=info || exit 0 
+[ "$LOGLEVEL"x = x ] && export LOGLEVEL=info || return 0 
 [ "$LOGSTACK"x = x ] && export LOGSTACK=false 
 [ "$DEBUG"x != x ] && [ "$DEBUG" = true ] && export LOGLEVEL=debug
 [ "$INFO"x != x ] && [ "$INFO" = true ] && export LOGLEVEL=info
@@ -105,6 +105,8 @@ exportf(){
 local file=$1
 require file 
 
+	file=find $(echo $PATH|sed -e 's:/:/ /g' ) -name "$file" || error "$file not found on $PATH"
+	require file
 	source "$file"
 	for funcName in $(grep '[a-zA-Z][a-zA-Z0-9]*(){' "$file" |sed -e 's/(){//g');do
 		eval export -f ${funcName}
@@ -118,7 +120,8 @@ local filename="${filename/ /}"
 local importedFile="IMPORTED_${filename%%.sh}"
 require file filename importedFile
 
-debug trying to import $file
-[ $(eval echo '"$'${importedFile}'"')x = x ] && exportf $file && eval export ${importedFile}=info && debug "$file imported" || (debug skip loading logging $file again && exit 0 )
+debug trying to import \'$file\'
+[ $(eval echo '"$'${importedFile}'"')x = x ] && exportf $file && eval export ${importedFile}=info && info "'$file' imported" || (info skiping importing \'$file\' again && return 0 )
 }; export -f import 
 
+export IMPORTED_corelib=info
