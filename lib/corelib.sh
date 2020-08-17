@@ -5,7 +5,7 @@
 set -f #disables the * autocomplet
 
 
-[ "$LOGLEVEL"x = x ] && export LOGLEVEL=info && info "loglevel set to info" || (debug skip loading the same logging again && exit 0 )
+[ "$LOGLEVEL"x = x ] && export LOGLEVEL=info || exit 0 
 [ "$LOGSTACK"x = x ] && export LOGSTACK=false 
 [ "$DEBUG"x != x ] && [ "$DEBUG" = true ] && export LOGLEVEL=debug
 [ "$INFO"x != x ] && [ "$INFO" = true ] && export LOGLEVEL=info
@@ -24,24 +24,24 @@ disableLogStack(){
 debug(){
 local stack=${FUNCNAME[*]}
 local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
-[ "$LOGLEVEL" = "debug" ] && echo "[DEBUG: ${filename}] ${FUNCNAME[1]}: $@  $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
+	[ "$LOGLEVEL" = "debug" ] \
+	&& echo "[DEBUG: ${FUNCNAME[1]} ]: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
         return 0
 };export -f debug
 
 info(){
 local stack=${FUNCNAME[*]}
-local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
-        ([ "$LOGLEVEL" = "debug" ] || [ "$LOGLEVEL" = "info" ]) && echo "[INFO: ${filename}] ${FUNCNAME[1]}: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
+        ([ "$LOGLEVEL" = "debug" ] || [ "$LOGLEVEL" = "info" ]) \
+	&& echo "[INFO: ${FUNCNAME[1]} ]: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
         return 0
 };export -f info
 
 warn(){
-local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
 local stack=${FUNCNAME[*]}
         ([ "$LOGLEVEL" = "debug" ] \
         || [ "$LOGLEVEL" = "info" ] \
         || [ "$LOGLEVEL" = "warn" ]) \
-         && echo "[WARN: ${filename}] ${FUNCNAME[1]}: $@  $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
+	&& echo "[WARN: ${FUNCNAME[1]} ]: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
         return 0
 };export -f warn
 
@@ -49,10 +49,9 @@ error(){
 local err=$1; 
 local stack=${FUNCNAME[*]}
 local re='^-?[0-9]+$'
-local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
 
 	[[ $err =~ $re ]] && shift || err=1
-        echo "[ERROR: ${filename}] ${FUNCNAME[1]}: $@  ([STACK] ${stack// /:})" >&2
+        echo "[ERROR: ${FUNCNAME[1]} ] $@  ([STACK] ${stack// /:})" >&2
         return $err
 };export -f error
 
@@ -60,10 +59,9 @@ fatal(){
 local err=$1;
 local stack=${FUNCNAME[*]}
 local re='^-?[0-9]+$'
-local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
 
 	[[ $err =~ $re ]] && shift || err=1
-        echo "[FATAL: ${filename}] ${FUNCNAME[1]}: Exit $err - $@ ([STACK] ${stack// /:})" >&2
+        echo "[FATAL: ${FUNCNAME[1]} ] Exit $err - $@ ([STACK] ${stack// /:})" >&2
         exit $err
 };export -f fatal
 
@@ -120,6 +118,7 @@ local filename="${filename/ /}"
 local importedFile="IMPORTED_${filename%%.sh}"
 require file filename importedFile
 
+debug trying to import $file
 [ $(eval echo '"$'${importedFile}'"')x = x ] && exportf $file && eval export ${importedFile}=info && debug "$file imported" || (debug skip loading logging $file again && exit 0 )
 }; export -f import 
 

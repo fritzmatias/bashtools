@@ -87,9 +87,6 @@ if [ "${OLDPS1}"x != "${PS1}"x ]; then
 	export OLDPS1=$PS1
 fi
 export GITCACHEENABLE=true;
-#gitCacheBashVarEnable # don't work yet,  the bachground processing generates new shells
-info "using $(gitCache)"
-#addCacheToIgnoreFile
 
 ## check if some color is set
 if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
@@ -115,7 +112,6 @@ else
 fi
 PS1="${PS1}"' '
 
-info "use gitCacheDisable to disable this format and the use of status caching."
 }
 ########################################################################## 
 
