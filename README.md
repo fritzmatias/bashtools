@@ -29,7 +29,7 @@ Bash Tools are a set of functions & scripts to help me devolp bash scripts or ma
  - assert: validates the execution of a command. Note: some characters, like '"', must be escaped    
 
 ### Git 
- {{embeda 'docs/git_ps1/README.md' 'Markdown'}}
+ {{embed 'docs/git_ps1/README.md' 'Markdown'}}
 
 
  repository information on the console prompt like: repo name, current branch, branch parity, sincronization status
