@@ -28,7 +28,10 @@ Bash Tools are a set of functions & scripts to help me devolp bash scripts or ma
  - require: forces a variable to be defined
  - assert: validates the execution of a command. Note: some characters, like '"', must be escaped    
 
-### Git
+### Git 
+ {{embeda 'docs/git_ps1/README.md' 'Markdown'}}
+
+
  repository information on the console prompt like: repo name, current branch, branch parity, sincronization status
  - git_ps1 modifies the console prompt. It is better to be loaded in user bashrc
 
