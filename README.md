@@ -8,6 +8,10 @@ Bash Tools are a set of functions & scripts to help me devolp bash scripts or ma
  - test:         scripts who are able to test the features
 
 ## Install
+ - `loadpath.sh` reads from ~/.path -one path per line- to create your PATH. Just add in your ~/.bashrc file.
+    ```
+    . <repo path>/loadpath.sh
+    ```
  - add the lib, bin, bashrc.d folders to your PATH
 
 ## what is available
