@@ -1,6 +1,4 @@
 #! /bin/bash
-# cf login --skip-ssl-validation --sso -a "https://api.mcf-np.threega.com"
-# cf env vc-unified-sale-report-feeder-it
 # it is expected a name convention on your ~/.ssh/config file 
 # where the connection has the same repo name
 
