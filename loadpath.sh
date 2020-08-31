@@ -6,4 +6,4 @@ for path in $(cat ~/.path); do
 done
 
 . corelib.sh
-
+. git_ps1.sh
