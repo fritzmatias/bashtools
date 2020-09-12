@@ -2,7 +2,7 @@
 # version: v0.5 
 # creator by Matias Fritz
 ## Deploy script for environment
-set -f #disables the * autocomplet
+#set -f #disables the * autocomplet
 
 
 [ "$LOGLEVEL"x = x ] && export LOGLEVEL=info || return 0 
@@ -79,7 +79,11 @@ local params;
 assert(){
 local cmd=$@
     require cmd
+    set -f
     eval "${cmd}" || fatal 1 "${FUNCNAME[1]}: Assertion error trying to execute: $@"
+    local result=$?
+    set +f
+    return $result
 }; export -f assert
 
 testlog(){
