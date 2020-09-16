@@ -11,6 +11,12 @@
 [ "$INFO"x != x ] && [ "$INFO" = true ] && export LOGLEVEL=info
 [ "$WARN"x != x ] && [ "$WARN" = true ] && export LOGLEVEL=warn
 
+red='\e[1;31m%b\e[0m'
+green='\e[1;32m%b\e[0m'
+yellow='\e[1;33m%b\e[0m'
+blue='\e[1;34m%b\e[0m'
+magenta='\e[1;35m%b\e[0m'
+cyan='\e[1;36m%b\e[0m'
 
 enableLogStack(){
   LOGSTACK=true
