@@ -11,12 +11,7 @@
 [ "$INFO"x != x ] && [ "$INFO" = true ] && export LOGLEVEL=info
 [ "$WARN"x != x ] && [ "$WARN" = true ] && export LOGLEVEL=warn
 
-red='\e[1;31m%b\e[0m'
-green='\e[1;32m%b\e[0m'
-yellow='\e[1;33m%b\e[0m'
-blue='\e[1;34m%b\e[0m'
-magenta='\e[1;35m%b\e[0m'
-cyan='\e[1;36m%b\e[0m'
+. colorslib.sh 
 
 enableLogStack(){
   LOGSTACK=true
@@ -31,23 +26,23 @@ debug(){
 local stack=${FUNCNAME[*]}
 local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
 	[ "$LOGLEVEL" = "debug" ] \
-	&& echo "[DEBUG: ${FUNCNAME[1]} ]: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
+	&& echo -e "${darkgray}[DEBUG: ${FUNCNAME[1]} ]: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
         return 0
 };export -f debug
 
 info(){
 local stack=${FUNCNAME[*]}
         ([ "$LOGLEVEL" = "debug" ] || [ "$LOGLEVEL" = "info" ]) \
-	&& echo "[INFO: ${FUNCNAME[1]} ]: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
+	&& echo -e "${cyan}[INFO: ${FUNCNAME[1]} ]: $@   ${darkgray}$([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
         return 0
 };export -f info
 
 warn(){
 local stack=${FUNCNAME[*]}
-        ([ "$LOGLEVEL" = "debug" ] \
+        ([ "$LOG'LEVEL" = "debug" ] \
         || [ "$LOGLEVEL" = "info" ] \
         || [ "$LOGLEVEL" = "warn" ]) \
-	&& echo "[WARN: ${FUNCNAME[1]} ]: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )" >&2
+	&& echo -e "${yellow}[WARN: ${FUNCNAME[1]} ]: $@  ${darkgray}$([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
         return 0
 };export -f warn
 
@@ -57,7 +52,7 @@ local stack=${FUNCNAME[*]}
 local re='^-?[0-9]+$'
 
 	[[ $err =~ $re ]] && shift || err=1
-        echo "[ERROR: ${FUNCNAME[1]} ] $@  ([STACK] ${stack// /:})" >&2
+        echo -e "${red}[ERROR: ${FUNCNAME[1]} ] $@  ${darkgray}([STACK] ${stack// /:})${default}" >&2
         return $err
 };export -f error
 
@@ -67,8 +62,8 @@ local stack=${FUNCNAME[*]}
 local re='^-?[0-9]+$'
 
 	[[ $err =~ $re ]] && shift || err=1
-        echo "[FATAL: ${FUNCNAME[1]} ] Exit $err - $@ ([STACK] ${stack// /:})" >&2
-        exit $err
+        echo -e "${red}[FATAL: ${FUNCNAME[1]} ] Exit $err - $@ ${darkgray} ([STACK] ${stack// /:})${default}" >&2
+        exec $SHELL
 };export -f fatal
 
 require(){
