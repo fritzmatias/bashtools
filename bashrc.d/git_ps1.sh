@@ -90,6 +90,43 @@ export GITCACHEENABLE=true;
 
 ## check if some color is set
 if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
+	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h$(__format ${white}):$(__format ${blue3})\w$(__format ${default})\$ '
+        PS1="${PS1}"\
+"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo ${gray2}\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(__format ${green} \$(ps1_showBranch)${default} &&\
+  cachefile=\$(gitCache) &&\
+  if ! isRepoCommited \${cachefile}  ;then\
+	  echo \$(__format ${red})\$(ps1_showUnsync \${cachefile} );\
+  else echo '\[\033[01;31m\]'\$(ps1_showPush);\
+  fi)'\[\033[01;30m\]${CUSTOM} $(ps1_cmdLineChar)\[\033[00m\] ')";
+
+else
+       PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+        PS1="${PS1}"\
+"\$( [ "$GITCACHEENABLE"x == "true"x ] && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(ps1_showBranch) &&\
+  cachefile=\$(gitCache) &&\
+  if ! isRepoCommited \${cachefile}  ;then\
+         echo \$(ps1_showUnsync \${cachefile} );\
+  else echo \$(ps1_showPush);\
+  fi)'${CUSTOM} $(ps1_cmdLineChar) ')";
+
+fi
+PS1="${PS1}"' '
+
+}
+########################################################################## 
+gitCacheEnable2(){
+if isGitCacheEnable; then
+	# fix multiple calls to this function
+	debug "calling multiple times to gitCacheEnable."
+fi
+
+if [ "${OLDPS1}"x != "${PS1}"x ]; then
+	export OLDPS1=$PS1
+fi
+export GITCACHEENABLE=true;
+
+## check if some color is set
+if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
         PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
         PS1="${PS1}"\
 "\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo '\[\033[01;30m\]'\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\[\033[01;32m\]'\$(ps1_showBranch)'\[\033[00m\]' &&\
@@ -114,5 +151,7 @@ PS1="${PS1}"' '
 
 }
 ########################################################################## 
+
+gitCacheEnable
 
 gitCacheEnable
