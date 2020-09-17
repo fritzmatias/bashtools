@@ -22,27 +22,31 @@ disableLogStack(){
   warn "LOGSTACK set to $LOGSTACK"
 }; export -f disableLogStack
 
+__log(){
+	uname | grep 'Darwin' >/dev/null 2>&1 &&  printf "$@\n" \
+	|| echo -e $@
+}; export -f __log
 debug(){
 local stack=${FUNCNAME[*]}
 local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
 	[ "$LOGLEVEL" = "debug" ] \
-	&& echo -e "${darkgray}[DEBUG: ${FUNCNAME[1]} ]: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
+	&& __log "${darkgray}[DEBUG: ${FUNCNAME[1]} ]: $@   $([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
         return 0
 };export -f debug
 
 info(){
 local stack=${FUNCNAME[*]}
         ([ "$LOGLEVEL" = "debug" ] || [ "$LOGLEVEL" = "info" ]) \
-	&& echo -e "${cyan}[INFO: ${FUNCNAME[1]} ]: $@   ${darkgray}$([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
+	&& __log "${cyan}[INFO: ${FUNCNAME[1]} ]: $@   ${darkgray}$([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
         return 0
 };export -f info
 
 warn(){
 local stack=${FUNCNAME[*]}
-        ([ "$LOG'LEVEL" = "debug" ] \
+        ([ "$LOGLEVEL" = "debug" ] \
         || [ "$LOGLEVEL" = "info" ] \
         || [ "$LOGLEVEL" = "warn" ]) \
-	&& echo -e "${yellow}[WARN: ${FUNCNAME[1]} ]: $@  ${darkgray}$([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
+	&& __log "${yellow}[WARN: ${FUNCNAME[1]} ]: $@  ${darkgray}$([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
         return 0
 };export -f warn
 
@@ -52,7 +56,7 @@ local stack=${FUNCNAME[*]}
 local re='^-?[0-9]+$'
 
 	[[ $err =~ $re ]] && shift || err=1
-        echo -e "${red}[ERROR: ${FUNCNAME[1]} ] $@  ${darkgray}([STACK] ${stack// /:})${default}" >&2
+        __log "${red}[ERROR: ${FUNCNAME[1]} ] $@  ${darkgray}([STACK] ${stack// /:})${default}" >&2
         return $err
 };export -f error
 
@@ -62,7 +66,7 @@ local stack=${FUNCNAME[*]}
 local re='^-?[0-9]+$'
 
 	[[ $err =~ $re ]] && shift || err=1
-        echo -e "${red}[FATAL: ${FUNCNAME[1]} ] Exit $err - $@ ${darkgray} ([STACK] ${stack// /:})${default}" >&2
+        __log "${red}[FATAL: ${FUNCNAME[1]} ] Exit $err - $@ ${darkgray} ([STACK] ${stack// /:})${default}" >&2
         exec $SHELL
 };export -f fatal
 

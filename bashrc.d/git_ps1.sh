@@ -80,7 +80,7 @@ export CUSTOM='\n'
 gitCacheEnable(){
 if isGitCacheEnable; then
 	# fix multiple calls to this function
-	warn "calling multiple times to gitCacheEnable."
+	debug "calling multiple times to gitCacheEnable."
 fi
 
 if [ "${OLDPS1}"x != "${PS1}"x ]; then
@@ -102,7 +102,7 @@ if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
 else
        PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
         PS1="${PS1}"\
-"\$( [ "$GITCACHEENABLE"x == "true"x ] && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(gitCurrentBranch) &&\
+"\$( [ "$GITCACHEENABLE"x == "true"x ] && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(ps1_showBranch) &&\
   cachefile=\$(gitCache) &&\
   if ! isRepoCommited \${cachefile}  ;then\
          echo \$(ps1_showUnsync \${cachefile} );\
