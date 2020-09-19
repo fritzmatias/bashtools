@@ -76,6 +76,14 @@ GIT_BRANCH_CURRENT=$(gitCurrentBranch)
   fi
 }
  
+#export green2=_green2_
+#export white=_white_
+#export blue3=_blue3_
+#export gray3=_gray3_
+#export green=_green_
+#export red3=_red3_
+
+
 export CUSTOM='\n'
 gitCacheEnable(){
 if isGitCacheEnable; then
@@ -92,11 +100,11 @@ export GITCACHEENABLE=true;
 if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
 	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h\[$(__format ${white})\]:\[$(__format ${blue3})\]\w\[$(__format ${default})\]\$ '
         PS1="${PS1}"\
-"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo \[${gray3}\]\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(__format \[${green}\]\$(ps1_showBranch)\[${default}\] &&\
+"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo \$(__format '\['\${gray3}'\]')\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${green}'\]' \$(ps1_showBranch) ${default} &&\
   cachefile=\$(gitCache) &&\
   if ! isRepoCommited \${cachefile}  ;then\
-	  echo \[\$(__format ${red3})\]\$(ps1_showUnsync \${cachefile} );\
-  else echo \[\$(__format ${red3})\]\$(ps1_showPush);\
+	  __format '\['\${red3}'\]'\$(ps1_showUnsync \${cachefile} );\
+  else echo \$(__format '\['\${red3}'\]')\$(ps1_showPush);\
 fi)'\[${default}\]${CUSTOM} $(ps1_cmdLineChar)\[${default}\] ')";
 
 else

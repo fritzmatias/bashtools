@@ -27,19 +27,27 @@ __format(){
 	|| ([ "$(__escapebash $@)"x = x ] && echo -ne || echo -e "$@" )
 }; export -f __format
 
-__escapecolors(){
-local data="$@"
-[ "$data"x = x ] \
-	&& sed -e 's/\([ \;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g' \
-	|| echo "$data" | sed -e 's/\([ \;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g'
-}; export -f __escapecolors
-
 __escapebash(){
 local data="$@"
+local escapePattern='s/\([\\$ \;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g'
 [ "$data"x = x ] \
-	&& sed -e 's/\([\\ \;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g' \
-	|| echo "$data" | sed -e 's/\([\\ \;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g'
+	&& sed -e "${escapePattern}" \
+	|| echo "$data" | sed -e "${escapePattern}" \
+	| sed -e "${escapePattern}" 
 }; export -f __escapebash
+
+testescape(){
+	v='\';e='\\\\'
+	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+	v=';';e='\\\;'
+	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+	v='[';e='\\\['
+	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+	v=']';e='\\\]'
+	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+	v='$';e='\\\$'
+	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+};export -f testescape
 
 debug(){
 local stack=${FUNCNAME[*]}

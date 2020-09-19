@@ -4,10 +4,10 @@
 export default="\e[0m" 
 export gray='\e[30m'
 export gray2='\e[90m'
-export gray3='\033[01\;90m'
+export gray3='\033[01;90m'
 export red='\e[31m'
 export red2='\e[91m'
-export red3='\033[01\;91m'
+export red3='\033[01;91m'
 export green='\e[32m'
 export green2='\e[92m'
 export green3='\033[01;92m'
