@@ -90,14 +90,14 @@ export GITCACHEENABLE=true;
 
 ## check if some color is set
 if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
-	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h$(__format ${white}):$(__format ${blue3})\w$(__format ${default})\$ '
+	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h\[$(__format ${white})\]:\[$(__format ${blue3})\]\w\[$(__format ${default})\]\$ '
         PS1="${PS1}"\
-"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo ${gray3}\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(__format ${green}\$(ps1_showBranch)${default} &&\
+"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo \[${gray3}\]\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(__format \[${green}\]\$(ps1_showBranch)\[${default}\] &&\
   cachefile=\$(gitCache) &&\
   if ! isRepoCommited \${cachefile}  ;then\
-	  echo \$(__format ${red3})\$(ps1_showUnsync \${cachefile} );\
-  else echo \$(__format ${red3})\$(ps1_showPush);\
-fi)'${default}${CUSTOM} $(ps1_cmdLineChar)${default} ')";
+	  echo \[\$(__format ${red3})\]\$(ps1_showUnsync \${cachefile} );\
+  else echo \[\$(__format ${red3})\]\$(ps1_showPush);\
+fi)'\[${default}\]${CUSTOM} $(ps1_cmdLineChar)\[${default}\] ')";
 
 else
        PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
