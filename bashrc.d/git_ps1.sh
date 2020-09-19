@@ -66,24 +66,19 @@ ps1_cmdLineChar(){
     fi
 }
  
-ps1_showBranch(){
-GIT_BRANCH_PARENT=$(gitMergeStatus)
-GIT_BRANCH_CURRENT=$(gitCurrentBranch)
-  if [ "$GIT_BRANCH_PARENT" ]; then 
-	  echo "($GIT_BRANCH_PARENT) $GIT_BRANCH_CURRENT"
+ps1_showRelatedBranches(){
+local git_branch_parent=$(gitMergeStatus)
+  if [ "$git_branch_parent" ]; then 
+	  echo "($git_branch_parent)"
   else
-	echo "$GIT_BRANCH_CURRENT"
-  fi
+	  echo ""
+ fi
+}
+
+ps1_showCurrentBranch(){
+	gitCurrentBranch
 }
  
-#export green2=_green2_
-#export white=_white_
-#export blue3=_blue3_
-#export gray3=_gray3_
-#export green=_green_
-#export red3=_red3_
-
-
 export CUSTOM='\n'
 gitCacheEnable(){
 if isGitCacheEnable; then
@@ -100,7 +95,7 @@ export GITCACHEENABLE=true;
 if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
 	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h\[$(__format ${white})\]:\[$(__format ${blue3})\]\w\[$(__format ${default})\]\$ '
         PS1="${PS1}"\
-"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo \$(__format '\['\${gray3}'\]')\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${green}'\]' \$(ps1_showBranch) ${default} &&\
+"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo \$(__format '\['\${gray3}'\]')\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]' \$(ps1_showRelatedBranches) '\['${green2}'\]' \$(ps1_showCurrentBranch) ${default} &&\
   cachefile=\$(gitCache) &&\
   if ! isRepoCommited \${cachefile}  ;then\
 	  __format '\['\${red3}'\]'\$(ps1_showUnsync \${cachefile} );\
@@ -110,7 +105,7 @@ fi)'\[${default}\]${CUSTOM} $(ps1_cmdLineChar)\[${default}\] ')";
 else
        PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
        PS1="${PS1}"\
-"\$( [ "$GITCACHEENABLE"x == "true"x ] && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(ps1_showBranch) &&\
+	       "\$( [ "$GITCACHEENABLE"x == "true"x ] && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(ps1_showRelatedBranches) \$(ps1_showCurrentBranch) &&\
   cachefile=\$(gitCache) &&\
   if ! isRepoCommited \${cachefile}  ;then\
          echo \$(ps1_showUnsync \${cachefile} );\
