@@ -10,6 +10,10 @@
 
 . gitlib.sh
 
+catCache(){
+	git status -s 2>/dev/null
+}
+
 isRepoCommited(){
 cachefile="$1"
 [ "$cachefile"x == x ] && cachefile=$(gitCache) 
@@ -20,7 +24,7 @@ cachefile="$1"
 
 gitCache(){
 local repoRoot="$(gitRepoLocalRootPath)"
-
+  echo "$repoRoot"
 }
  
 gitCacheDisable(){
@@ -93,24 +97,25 @@ export GITCACHEENABLE=true;
 
 ## check if some color is set
 if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
-	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h\[$(__format ${white})\]:\[$(__format ${blue3})\]\w\[$(__format ${default})\]\$ '
+	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h\[$(__format ${white})\]:\[$(__format ${boldStart}${blue})\]\w\[$(__format ${default})\]\$ '
         PS1="${PS1}"\
-"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo \$(__format '\['\${gray3}'\]')\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]' \$(ps1_showRelatedBranches) '\['${green2}'\]' \$(ps1_showCurrentBranch) ${default} &&\
+"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo '\['${gray2}${boldStart}'\]'\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]'\$(ps1_showRelatedBranches)' \['${boldStart}${green}'\]'\$(ps1_showCurrentBranch)'\['${boldEnd}${default}'\]' &&\
   cachefile=\$(gitCache) &&\
   if ! isRepoCommited \${cachefile}  ;then\
-	  __format '\['\${red3}'\]'\$(ps1_showUnsync \${cachefile} );\
-  else echo \$(__format '\['\${red3}'\]')\$(ps1_showPush);\
-fi)'\[${default}\]${CUSTOM} $(ps1_cmdLineChar)\[${default}\] ')";
+	  echo '\['${red}${boldStart}'\]'\$(ps1_showUnsync \${cachefile})'\['${boldEnd}'\]';\
+  else echo '\['${red}${boldStart}'\]'\$(ps1_showPush);\
+  fi)'\[${default}\]${CUSTOM} \$ \[${default}\] ')";
 
 else
        PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
        PS1="${PS1}"\
-	       "\$( [ "$GITCACHEENABLE"x == "true"x ] && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(ps1_showRelatedBranches) \$(ps1_showCurrentBranch) &&\
+	       "\$( [ "$GITCACHEENABLE"x == "true"x ] \
+	       && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(ps1_showRelatedBranches) \$(ps1_showCurrentBranch) &&\
   cachefile=\$(gitCache) &&\
   if ! isRepoCommited \${cachefile}  ;then\
          echo \$(ps1_showUnsync \${cachefile} );\
   else echo \$(ps1_showPush);\
-  fi)'${CUSTOM} $(ps1_cmdLineChar) ')";
+  fi)'${CUSTOM} \$ ')";
 
 fi
 PS1="${PS1}"' '
