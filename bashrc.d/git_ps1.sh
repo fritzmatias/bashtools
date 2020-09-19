@@ -102,7 +102,8 @@ if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
 "\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo '\['${gray2}${boldStart}'\]'\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]'\$(ps1_showRelatedBranches)' \['${boldStart}${green}'\]'\$(ps1_showCurrentBranch)'\['${boldEnd}${default}'\]' &&\
   cachefile=\$(gitCache) &&\
   if ! isRepoCommited \${cachefile}  ;then\
-	  echo '\['${red}${boldStart}'\]'\$(ps1_showUnsync \${cachefile})'\['${boldEnd}'\]';\
+	  echo '\['${red}${boldStart}'\]'\$(ps1_showUnsync \${cachefile})'\['${default}'\]';\
+	  echo '\['${red}${boldStart}'\]'\$(ps1_showPush)'\['${default}'\]';\
   else echo '\['${red}${boldStart}'\]'\$(ps1_showPush);\
   fi)'\[${default}\]${CUSTOM} \$ \[${default}\] ')";
 
