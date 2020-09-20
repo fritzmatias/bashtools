@@ -7,7 +7,6 @@
 ## Instalation:
 ##	copy the script to /home/${user}/
 ## 	execute the script inside the ~/.bashrc with: '. scriptName'
-set -f
 
 . corelib.sh
 
@@ -83,9 +82,9 @@ echo ${GITREPOLOCALROOTPATH} ;
 }; export -f gitRepoLocalRootPath
 
 isGitRepo(){
-  git branch >/dev/null 2>/dev/null 
+  command git branch >/dev/null 2>/dev/null 
   return $?
-}
+};export -f isGitRepo
 
 isNotMergeInProgress(){
  git merge HEAD >/dev/null 2>/dev/null

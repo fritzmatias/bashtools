@@ -8,7 +8,13 @@
 ##	copy the script to /home/${user}/
 ## 	execute the script inside the ~/.bashrc with: '. scriptName'
 
+export LOGLEVEL=debug
 . gitlib.sh
+ 
+isGitRepo(){
+  command git branch >/dev/null 2>/dev/null 
+  return $?
+};export -f isGitRepo
 
 catCache(){
 	git status -s 2>/dev/null
@@ -28,7 +34,7 @@ local repoRoot="$(gitRepoLocalRootPath)"
 }
  
 gitCacheDisable(){
-if [ "${OLDPS1}"x != "$PS1"x ]; then
+if [ "$OLDPS1"x != x ] && [ "${OLDPS1}"x != "$PS1"x ]; then
 	PS1=$OLDPS1;
 fi
 export GITCACHEENABLE=false;
@@ -83,6 +89,11 @@ ps1_showCurrentBranch(){
 	gitCurrentBranch
 }
  
+isColorsSet(){
+echo "$PS1" | grep '\\e\[' >/dev/null 2>&1 ||
+echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1
+}
+
 export CUSTOM='\n'
 gitCacheEnable(){
 if isGitCacheEnable; then
@@ -96,24 +107,25 @@ fi
 export GITCACHEENABLE=true;
 
 ## check if some color is set
-if echo "$PS1" | grep '\\\[\\033\[' >/dev/null 2>&1 ; then
+if isColorsSet; then
 	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h\[$(__format ${white})\]:\[$(__format ${boldStart}${blue})\]\w\[$(__format ${default})\]\$ '
         PS1="${PS1}"\
-"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo '\['${gray2}${boldStart}'\]'\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]'\$(ps1_showRelatedBranches)' \['${boldStart}${green}'\]'\$(ps1_showCurrentBranch)'\['${boldEnd}${default}'\]' &&\
-  cachefile=\$(gitCache) &&\
-  if ! isRepoCommited \${cachefile}  ;then\
-	  echo '\['${red}${boldStart}'\]'\$(ps1_showUnsync \${cachefile})'\['${default}'\]';\
+"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo '\['${gray2}${boldStart}'\]'\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]'\$(ps1_showRelatedBranches)' \['${boldStart}${green}'\]'\$(ps1_showCurrentBranch)'\['${boldEnd}${default}'\]' \
+  && cachefile=\$(gitCache)\
+  && if ! isRepoCommited \${cachefile} ;then\
+	  echo \[${red}${boldStart}\]\$(ps1_showUnsync \${cachefile})\[${default}\];\
 	  echo '\['${red}${boldStart}'\]'\$(ps1_showPush)'\['${default}'\]';\
-  else echo '\['${red}${boldStart}'\]'\$(ps1_showPush);\
-  fi)'\[${default}\]${CUSTOM} \$ \[${default}\] ')";
+  else \
+	echo '\['${red}${boldStart}'\]'\$(ps1_showPush);\
+  fi)\[${default}\]'${CUSTOM} \$' \[${default}\] )";
 
 else
-       PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+       PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ ' 
        PS1="${PS1}"\
 	       "\$( [ "$GITCACHEENABLE"x == "true"x ] \
-	       && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(ps1_showRelatedBranches) \$(ps1_showCurrentBranch) &&\
-  cachefile=\$(gitCache) &&\
-  if ! isRepoCommited \${cachefile}  ;then\
+	       && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(ps1_showRelatedBranches) \$(ps1_showCurrentBranch) \
+ &&  cachefile=\$(gitCache) \
+ &&  if ! isRepoCommited \${cachefile}  ;then\
          echo \$(ps1_showUnsync \${cachefile} );\
   else echo \$(ps1_showPush);\
   fi)'${CUSTOM} \$ ')";
@@ -123,5 +135,5 @@ PS1="${PS1}"' '
 
 }
 ########################################################################## 
-gitCacheEnable
-
+#gitCacheEnable
+gitCacheDisable

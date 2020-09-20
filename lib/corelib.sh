@@ -147,13 +147,22 @@ require file
 
 import(){
 local file=$1
-local filename=$(basename "$file")
-local filename="${filename/ /}"
-local importedFile="IMPORTED_${filename%%.sh}"
-require file filename importedFile
+#local filename=$(basename "$file")
+#local filename="${filename/ /}"
+#local importedFile="IMPORTED_${filename%%.sh}"
+#require file filename importedFile
+require file 
 
-debug trying to import \'$file\'
-[ $(eval echo '"$'${importedFile}'"')x = x ] && exportf $file && eval export ${importedFile}=info && info "'$file' imported" || (info skiping importing \'$file\' again && return 0 )
+local filepath=$(IFS=':';for path in $PATH; do find $path -name $file 2>/dev/null;done|sort -u)
+local pathcount=$(echo $filepath|wc -l) 
+
+	[ "$pathcount" -gt 1 ] && fatal 1 "Multiple paths importing $file ($pathcount: $filepath)"
+	source $filepath && debug "$filepath imported on process ($$)" || fatal 2 "Can't import $file from $filepath"
+
+#	[ $(eval echo '"$'${importedFile}'"')x = x ] \
+#	&& source $filepath && debug "$filepath imported" \
+#	&& eval export ${importedFile}=info && info "'$file' imported" || fatal 2 "Can't import $file from $filepath"
+
 }; export -f import 
 
 export IMPORTED_corelib=info
