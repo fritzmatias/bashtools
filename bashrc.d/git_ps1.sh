@@ -8,7 +8,6 @@
 ##	copy the script to /home/${user}/
 ## 	execute the script inside the ~/.bashrc with: '. scriptName'
 
-export LOGLEVEL=debug
 . gitlib.sh
  
 isGitRepo(){
