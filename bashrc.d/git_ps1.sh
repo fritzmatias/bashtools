@@ -107,12 +107,12 @@ export GITCACHEENABLE=true;
 
 ## check if some color is set
 if isColorsSet; then
-	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h\[$(__format ${white})\]:\[$(__format ${boldStart}${blue})\]\w\[$(__format ${default})\]\$ '
+	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h\[$(__format ${white})\]:$(__format ${boldStart}${blue})\w$(__format ${default})\$ '
         PS1="${PS1}"\
 "\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo '\['${gray2}${boldStart}'\]'\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]'\$(ps1_showRelatedBranches)' \['${boldStart}${green}'\]'\$(ps1_showCurrentBranch)'\['${boldEnd}${default}'\]' \
   && cachefile=\$(gitCache)\
   && if ! isRepoCommited \${cachefile} ;then\
-	  echo \[${red}${boldStart}\]\$(ps1_showUnsync \${cachefile})\[${default}\];\
+	  echo '\['${red}${boldStart}'\]'\$(ps1_showUnsync \${cachefile})'\['${default}'\]';\
 	  echo '\['${red}${boldStart}'\]'\$(ps1_showPush)'\['${default}'\]';\
   else \
 	echo '\['${red}${boldStart}'\]'\$(ps1_showPush);\
