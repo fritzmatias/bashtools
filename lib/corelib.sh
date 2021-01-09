@@ -29,7 +29,7 @@ __format(){
 
 __escapebash(){
 local data="$@"
-local escapePattern='s/\([\\$ \;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g'
+local escapePattern='s/\([\\$ "\;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\'"'"'/g'
 [ "$data"x = x ] \
 	&& sed -e "${escapePattern}" \
 	|| echo "$data" | sed -e "${escapePattern}" \
@@ -46,7 +46,11 @@ testescape(){
 	v=']';e='\\\]'
 	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
 	v='$';e='\\\$'
-	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping "$v" ok || error escaping $v - $a = $e
+	v="'";e='\\\'"'"
+	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping "'$v' - '$a' = '$e'"
+	v='"';e='\\\"'
+	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping "'$v' - '$a' = '$e'"
 };export -f testescape
 
 debug(){
@@ -164,5 +168,12 @@ local pathcount=$(echo $filepath|wc -l)
 #	&& eval export ${importedFile}=info && info "'$file' imported" || fatal 2 "Can't import $file from $filepath"
 
 }; export -f import 
+
+foreach(){
+local cmd="$@"
+  for repo in $(ls -1); do 
+  	eval "$(echo $cmd | sed -e 's/{}/'$repo'/g')";
+  done;
+}; export -f foreach
 
 export IMPORTED_corelib=info
