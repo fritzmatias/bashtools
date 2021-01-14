@@ -100,6 +100,15 @@ if isGitCacheEnable; then
 	debug "calling multiple times to gitCacheEnable."
 fi
 
+ps1format(){
+local data="$@"
+local escapePattern="\[$data\]"
+  [ "$data"x = x ] \
+    && echo "" \
+    || printf $escapePattern 
+};export -f ps1format
+
+
 if [ "${OLDPS1}"x != "${PS1}"x ]; then
 	export OLDPS1=$PS1
 fi
@@ -107,17 +116,17 @@ export GITCACHEENABLE=true;
 
 ## check if some color is set
 if isColorsSet; then
-PS1='${debian_chroot:+($debian_chroot)}\[$(__format ${green2})\]\u@\h\[$(__format ${white})\]:\[$(__format ${boldStart}${blue})\]\w\[$(__format ${default})\]\$ '
-        PS1="${PS1}"\
+  PS1="${debian_chroot:+($debian_chroot)}$(ps1format ${green2})\u@\h$(ps1format ${white}):$(ps1format ${boldStart}${blue})\w$(ps1format ${default}) \$ "
+  PS1="$PS1"\
 "\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo \
-  && echo '\['\$(__format ${gray2}${boldStart})'\]'\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]'\$(ps1_showRelatedBranches)' \['${boldStart}${green}'\]'\$(ps1_showCurrentBranch)'\['${boldEnd}${default}'\]' \
-  && cachefile=\$(gitCache)\
-  && if ! isRepoCommited \${cachefile} ;then\
-	  echo '\['${red}${boldStart}'\]'\$(ps1_showUnsync \${cachefile})'\['${default}'\]';\
-	  echo '\['${red}${boldStart}'\]'\$(ps1_showPush)'\['${default}'\]';\
-  else \
-	echo '\['${red}${boldStart}'\]'\$(ps1_showPush);\
-  fi)\[${default}\]'${CUSTOM} \$' \[${default}\] )";
+  && echo $(ps1format ${gray2}${boldStart})\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo $(ps1format ${default}${green})\$(ps1_showRelatedBranches)$(ps1format ${boldStart}${green})\$(ps1_showCurrentBranch)$(ps1format ${boldEnd}${default}) \
+    && cachefile=\$(gitCache)\
+    && if ! isRepoCommited \${cachefile} ;then\
+      echo $(ps1format ${red}${boldStart})\$(ps1_showUnsync \${cachefile})$(ps1format ${default});\
+      echo $(ps1format ${red}${boldStart})\$(ps1_showPush)$(ps1format ${default});\
+    else \
+    echo $(ps1format ${red}${boldStart})\$(ps1_showPush);\
+    fi)$(ps1format ${default})'${CUSTOM} \$' $(ps1format ${default}) )";
 
 else
        PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ ' 
