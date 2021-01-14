@@ -50,12 +50,12 @@ ps1_gitType(){
  
 ps1_showUnsync(){
 local cachefile=$1
-         echo ':unsync(M:'$(catCache "${cachefile}" | egrep '^[ AMDRCU]{2,2}' 2>/dev/null | wc -l)',?:'$(catCache "${cachefile}" | egrep '^\?\?' 2>/dev/null | wc -l)')';
+  echo ':unsync(M:'$(catCache "${cachefile}" | egrep '^[ AMDRCU]{2,2}' 2>/dev/null | wc -l)',?:'$(catCache "${cachefile}" | egrep '^\?\?' 2>/dev/null | wc -l)')';
 }
  
 ps1_showPush(){
 local pendingPush=$(git rev-parse @{push}... 2>/dev/null| sed -e 's/\^//g' | sort -u |wc -l)
-    [ ${pendingPush} -gt 1 ] && echo ":push $(gitCurrentPushBranch)"
+  [ ${pendingPush} -gt 1 ] && echo ":push $(gitCurrentPushBranch)"
 }
  
 ps1_showOrigin(){
@@ -107,9 +107,10 @@ export GITCACHEENABLE=true;
 
 ## check if some color is set
 if isColorsSet; then
-	PS1='${debian_chroot:+($debian_chroot)}$(__format ${green2})\u@\h\[$(__format ${white})\]:$(__format ${boldStart}${blue})\w$(__format ${default})\$ '
+PS1='${debian_chroot:+($debian_chroot)}\[$(__format ${green2})\]\u@\h\[$(__format ${white})\]:\[$(__format ${boldStart}${blue})\]\w\[$(__format ${default})\]\$ '
         PS1="${PS1}"\
-"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo && echo '\['${gray2}${boldStart}'\]'\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]'\$(ps1_showRelatedBranches)' \['${boldStart}${green}'\]'\$(ps1_showCurrentBranch)'\['${boldEnd}${default}'\]' \
+"\$( [ "${GITCACHEENABLE}"x == truex ] && isGitRepo \
+  && echo '\['\$(__format ${gray2}${boldStart})'\]'\$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo '\['${default}${green}'\]'\$(ps1_showRelatedBranches)' \['${boldStart}${green}'\]'\$(ps1_showCurrentBranch)'\['${boldEnd}${default}'\]' \
   && cachefile=\$(gitCache)\
   && if ! isRepoCommited \${cachefile} ;then\
 	  echo '\['${red}${boldStart}'\]'\$(ps1_showUnsync \${cachefile})'\['${default}'\]';\
@@ -121,13 +122,16 @@ if isColorsSet; then
 else
        PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ ' 
        PS1="${PS1}"\
-	       "\$( [ "$GITCACHEENABLE"x == "true"x ] \
-	       && isGitRepo && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$(echo \$(ps1_showRelatedBranches) \$(ps1_showCurrentBranch) \
- &&  cachefile=\$(gitCache) \
- &&  if ! isRepoCommited \${cachefile}  ;then\
-         echo \$(ps1_showUnsync \${cachefile} );\
-  else echo \$(ps1_showPush);\
-  fi)'${CUSTOM} \$ ')";
+	      "\$( [ "$GITCACHEENABLE"x == "true"x ] \
+	      && isGitRepo \
+        && echo \$(ps1_gitType)':'\$(ps1_showOrigin)' : '\$( \
+          echo \$(ps1_showRelatedBranches) \$(ps1_showCurrentBranch) \
+          &&  cachefile=\$(gitCache) \
+          &&  if ! isRepoCommited \${cachefile}  ;then\
+             echo \$(ps1_showUnsync \${cachefile} );\
+            else echo \$(ps1_showPush);\
+            fi )\
+          '${CUSTOM} \$ ')";
 
 fi
 PS1="${PS1}"' '

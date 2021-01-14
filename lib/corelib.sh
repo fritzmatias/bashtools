@@ -23,13 +23,27 @@ disableLogStack(){
 }; export -f disableLogStack
 
 __format(){
-	uname | grep 'Darwin' >/dev/null 2>&1 &&  printf "$@\n" \
-	|| ([ "$(__escapebash $@)"x = x ] && echo -ne || echo -e "$@" )
+local params=$(isDebug && echo "$(__escapebash $@)" || echo $@) 
+	debug __escapebash: "$(__escapebash ${params})"
+	debug __ps1esc: "$(__ps1esc ${params})"
+	uname | grep 'Darwin' >/dev/null 2>&1 \
+		&& printf "$params" \
+		|| echo -ne "$params" 
 }; export -f __format
+
+__ps1esc(){
+local data="$@"
+local escapePattern='s/\([\\$ "\;\*]\)/\1/g;s/\\\[/\\\\\[/g;s/\\\]/\\\\\]/g;s/'"'"'/\\'"'"'/g'
+[ "$data"x = x ] \
+	&& sed -e "${escapePattern}" \
+	|| echo "$data" | sed -e "${escapePattern}" \
+		| sed -e "${escapePattern}" 
+}; export -f __ps1esc
 
 __escapebash(){
 local data="$@"
-local escapePattern='s/\([\\$ "\;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\'"'"'/g'
+#local escapePattern='s/\([\\$ "\;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\'"'"'/g'
+local escapePattern='s/\([\\$ "\;\*]\)/\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\'"'"'/g'
 [ "$data"x = x ] \
 	&& sed -e "${escapePattern}" \
 	|| echo "$data" | sed -e "${escapePattern}" \
@@ -38,20 +52,52 @@ local escapePattern='s/\([\\$ "\;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\
 
 testescape(){
 	v='\';e='\\\\'
-	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+	a=$(__escapebash "$v") \
+		&& [ "$a" = "$e" ] \
+		&& [ $(echo $a| wc -c) -eq $(echo $e|wc -c) ] \
+		&& info escaping $v '->' $a '('$(echo $a| wc -c)'|'$(echo $e|wc -c)')' ok \
+		|| error escaping $v - $a = $e
 	v=';';e='\\\;'
-	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+	a=$(__escapebash "$v") \
+		&& [ "$a" = "$e" ] \
+		&& [ $(echo $a| wc -c) -eq $(echo $e|wc -c) ] \
+		&& info escaping $v '->' $a '('$(echo $a| wc -c)'|'$(echo $e|wc -c)')' ok \
+		|| error escaping $v - $a = $e
 	v='[';e='\\\['
-	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+	a=$(__escapebash "$v") \
+		&& [ "$a" = "$e" ] \
+		&& [ $(echo $a| wc -c) -eq $(echo $e|wc -c) ] \
+		&& info escaping $v '->' $a '('$(echo $a| wc -c)'|'$(echo $e|wc -c)')' ok \
+		|| error escaping $v - $a = $e
 	v=']';e='\\\]'
-	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping $v - $a = $e
+	a=$(__escapebash "$v") \
+		&& [ "$a" = "$e" ] \
+		&& [ $(echo $a| wc -c) -eq $(echo $e|wc -c) ] \
+		&& info escaping $v '->' $a '('$(echo $a| wc -c)'|'$(echo $e|wc -c)')' ok \
+		|| error escaping $v - $a = $e
 	v='$';e='\\\$'
-	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping "$v" ok || error escaping $v - $a = $e
+	a=$(__escapebash "$v") \
+		&& [ "$a" = "$e" ] \
+		&& [ $(echo $a| wc -c) -eq $(echo $e|wc -c) ] \
+		&& info escaping $v '->' $a '('$(echo $a| wc -c)'|'$(echo $e|wc -c)')' ok \
+		|| error escaping $v - $a = $e
 	v="'";e='\\\'"'"
-	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping "'$v' - '$a' = '$e'"
+	a=$(__escapebash "$v") \
+		&& [ "$a" = "$e" ] \
+		&& [ $(echo $a| wc -c) -eq $(echo $e|wc -c) ] \
+		&& info escaping $v '->' $a '('$(echo $a| wc -c)'|'$(echo $e|wc -c)')' ok \
+		|| error escaping $v - $a = $e
 	v='"';e='\\\"'
-	a=$(__escapebash "$v");[ "$a" = "$e" ] && info escaping $v ok || error escaping "'$v' - '$a' = '$e'"
+	a=$(__escapebash "$v") \
+		&& [ "$a" = "$e" ] \
+		&& [ $(echo $a| wc -c) -eq $(echo $e|wc -c) ] \
+		&& info escaping $v '->' $a '('$(echo $a| wc -c)'|'$(echo $e|wc -c)')' ok \
+		|| error escaping $v - $a = $e
 };export -f testescape
+
+isDebug(){
+	[ "$LOGLEVEL" = "debug" ] 
+};export -f isDebug
 
 debug(){
 local stack=${FUNCNAME[*]}
