@@ -25,16 +25,16 @@ disableLogStack(){
 __format(){
 local params=$(isDebug && echo "$(__escapebash $@)" || echo $@) 
 	debug __escapebash: "$(__escapebash ${params})"
-	uname | grep 'Darwin' >/dev/null 2>&1 \
-		&& printf "$params" \
-		|| echo -ne "$params" 
+	uname | grep 'Darwin' >/dev/null 2>&1 &&  printf "$@\n" \
+    || ([ "$(__escapebash $@)"x = x ] \
+		&& echo -ne "$params" \
+		|| echo -e "$params") 
 }; export -f __format
 
 
 __escapebash(){
 local data="$@"
-#local escapePattern='s/\([\\$ "\;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\'"'"'/g'
-local escapePattern='s/\([\\$ "\;\*]\)/\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\'"'"'/g'
+local escapePattern='s/\([\\$ "\;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\'"'"'/g'
 [ "$data"x = x ] \
 	&& sed -e "${escapePattern}" \
 	|| echo "$data" | sed -e "${escapePattern}" \
