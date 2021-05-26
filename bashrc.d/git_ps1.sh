@@ -149,4 +149,4 @@ PS1="${PS1}"' '
 }
 ########################################################################## 
 #gitCacheEnable
-gitCacheDisable
+#gitCacheDisable
