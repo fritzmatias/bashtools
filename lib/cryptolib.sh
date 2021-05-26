@@ -15,4 +15,4 @@ require p12file jksfile p12alias jksalias
 
 	keytool -importkeystore -srckeystore "$p12file" -srcstoretype pkcs12 -srcalias "$p12alias" \
  -destkeystore "$jksfile" -deststoretype jks -destalias "$jksalias"
-}; export -f p12tojks
+}; #export -f p12tojks

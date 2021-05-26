@@ -13,7 +13,7 @@ repoDir=$(cd "$repoDir" && isGitRepo \
 			|| echo "${repoDir}" && error 2 \'${repoDir}\' is not a repo )
 require repoDir
   ps -fax|grep ssh |grep "$repoDir" |grep -v grep| sort -s 
-}; export -f lstunnels
+}; #export -f lstunnels
 
 starttunnels(){
 local repoDir="$1"
@@ -25,10 +25,10 @@ require repoDir
 for host in $(grep $(basename $repoDir) ~/.ssh/config | sed -e 's/[ ]*Host[ ]*//g;s/[ ]*$//g'); do
   ps -fax|grep ssh |grep "$host" || ssh -NfT $host && echo "tunnel up $host"
 done
-};export -f starttunnels
+};#export -f starttunnels
 
 stoptunnels(){
 local repoDir="$1"
   lstunnels "${repoDir}" | awk '{print $2}' | xargs kill 
-}; export -f stoptunnels
+}; #export -f stoptunnels
 
