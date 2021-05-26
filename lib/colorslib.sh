@@ -13,6 +13,7 @@ export underlinedEnd="\e[24m"
 export default="\e[0m" 
 export gray='\e[30m'
 export gray2='\e[90m'
+export darkgray='\e[90m'
 export red='\e[31m'
 export red2='\e[91m'
 export green='\e[32m'

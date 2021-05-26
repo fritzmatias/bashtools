@@ -2,6 +2,9 @@
 account="prod"
 userID=`whoami`
 #github_api_v3_access_token=`aws ssm get-parameters --with-decryption --names "/vcis/${account}/app/github/token-${userID}" --query 'Parameters[0].Value' | tr -d '"'`
+
+. corelib.sh
+
 usage(){
 exec cat <<EOF
   automated tool to replace configuration values on json files. (config/env-config.json)
@@ -9,18 +12,6 @@ exec cat <<EOF
     replace <jsonKey> <MatchValue> <newValue> <list of repos> 
     search <MatchJsonKey> <MatchValue> <list of files>
 EOF
-}
-
-
-info(){
-    echo $(date +%H:%M:%S) $@ >&1
-}
-
-error(){
-local err=$1;
-    echo $err|grep -e '[0-9]\+' && shift 1 || err=1;
-    echo $(date +%H:%M:%S) $@ >&2
-    return $err
 }
 
 checkIfRepoExist(){
@@ -149,6 +140,7 @@ local json="${1}"
 local root="$2"
 local result="$(echo "${json}" |sed -e 's/:[ ]*\({["a-zA-Z0-9+/=\.< &|>^~\/@,:_-]*}\)/:"removedObject"/g')"
 local keys=""
+debug newCallExpand root:\'$root\' >&2
 #echo [debug] newCallExpand root:\'$root\' >&2
 if [ "$json" = "$result" ] ;then
 	#echo [debug] json:$json result:$result >&2
@@ -204,12 +196,12 @@ done
 opt=$1;shift
 case $opt in
   clone)
-	baseBranch='master'
-	for repo in $@; do
+    baseBranch='master'
+    for repo in $@; do
 	      grep -v $repo repos.deprecated.txt >/dev/null 2>&1 \
 	      && checkIfRepoExist $repo \
 	      && gitClone $repo $baseBranch || error Repo is deprecated or it exist on the fs
-	done
+    done
 	;;
   replace)
     #jsonKeyPath='.PROD.DB_HOST'
@@ -246,20 +238,19 @@ case $opt in
       || error 3 "FAIL on repo $repo"
     done
     ;;
-
   search)
-	repoSearch 
-  ;;
+      repoSearch 
+    ;;
   expandJSONKeys)
-	OLD_IFS=$IFS
-	IFS='
+      OLD_IFS=$IFS
+      IFS='
 '
-	expandJSONKeys $(cat $1|jq -cM .) 
-	IFS=$OLD_IFS
-  ;;
+      expandJSONKeys $(cat $1|jq -cM .) 
+      IFS=$OLD_IFS
+    ;;
   json2property)
-	json2property $1
-  ;;
+      json2property $1
+    ;;
   *)
     usage
 esac
