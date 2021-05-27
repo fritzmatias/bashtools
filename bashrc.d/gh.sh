@@ -136,14 +136,14 @@ gitPush(){
 }
 
 expandJSONKeys(){
+#set -x
 local json="${1}"
 local root="$2"
-#local result="$(echo "${json}" |sed -e 's/:[ ]*\({["a-zA-Z0-9+/=\.< &|>^~\/@,:_-]*}\)/:"removedObject"/g')"
-local keyvalue='["a-zA-Z0-9+/=\.< &|>^~\/@,:_-]*'
-local obj='{'"${keyvalue}"'}[ ]*'
-local keyarray='\['${keyvalue}'\][ ]*'
-local objarray='\['${obj}'\][ ]*'
-local result="$(echo "${json}" |sed -e 's/:[ ]*\('${obj}'\)/:"removedObject"/g;s/:[ ]*\('${keyarray}'\)/:"valuesArray"/g;s/:[ ]*\('${objarray}'\)/:"objectArray"/g')"
+local keyvalue='["a-zA-Z0-9\. \$&|^~\/@,:_\*\\=<>+-]*'
+local obj="{${keyvalue}}[ ]*"
+local keyarray='\['"${keyvalue}"'\][ ]*'
+local objarray='\['"${obj}"'\][ ]*'
+local result=$(echo "${json}" |sed -e "s/:[ ]*\(${obj}\)/:\"removedObject\"/g;s/:[ ]*\(${keyarray}\)/:\"valuesArray\"/g;s/:[ ]*\(${objarray}\)/:\"objectArray\"/g;s/'//g")
 local keys=""
 debug newCallExpand root:\'$root\' 
 if [ "$json" = "$result" ] ;then
@@ -172,7 +172,8 @@ debug exitCallExpand>&2
 json2property(){
 local file=$1
 local filedata=$(cat $file)
-for key in $(expandJSONKeys "$(echo "$filedata"|jq -cM)");do
+for key in $(expandJSONKeys "$(echo "$filedata"|jq -cM .)");do
+        debug "key: $key"
         echo "$key=$(echo "$filedata"|jq "$key")";
 done
 }
@@ -186,7 +187,7 @@ poskey=.value;
 
 for file in $(find value-capture/ POD-Inc/ -name 'config.json'); do 
 	realKeys=$(grep $searchKey $file|cut -d':' -f1|sort -u |sed -e 's/"//g;s/^[ ]*//g')
-	jq -cM . | sed -e 's/:[ ]*\({["a-zA-Z0-9+/=\. ,:_-]*}\)/: "removedObject"/g'|jq
+	jq -cM . | sed -e 's/:[ ]*\({["a-zA-Z0-9+\/=\. ,:_-]*}\)/: "removedObject"/g'|jq
 	for key in $realKeys; do
 		info using $key
 		grep $key $file >/dev/null 2>&1 \
