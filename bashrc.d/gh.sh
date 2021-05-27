@@ -138,29 +138,35 @@ gitPush(){
 expandJSONKeys(){
 local json="${1}"
 local root="$2"
-local result="$(echo "${json}" |sed -e 's/:[ ]*\({["a-zA-Z0-9+/=\.< &|>^~\/@,:_-]*}\)/:"removedObject"/g')"
+#local result="$(echo "${json}" |sed -e 's/:[ ]*\({["a-zA-Z0-9+/=\.< &|>^~\/@,:_-]*}\)/:"removedObject"/g')"
+local keyvalue='["a-zA-Z0-9+/=\.< &|>^~\/@,:_-]*'
+local obj='{'"${keyvalue}"'}[ ]*'
+local keyarray='\['${keyvalue}'\][ ]*'
+local objarray='\['${obj}'\][ ]*'
+local result="$(echo "${json}" |sed -e 's/:[ ]*\('${obj}'\)/:"removedObject"/g;s/:[ ]*\('${keyarray}'\)/:"valuesArray"/g;s/:[ ]*\('${objarray}'\)/:"objectArray"/g')"
 local keys=""
-debug newCallExpand root:\'$root\' >&2
-#echo [debug] newCallExpand root:\'$root\' >&2
+debug newCallExpand root:\'$root\' 
 if [ "$json" = "$result" ] ;then
-	#echo [debug] json:$json result:$result >&2
-	#echo [debug] json == result TRUE >&2
+	debug json:$json
+  debug result:$result 
+	debug json == result TRUE 
 	for key in $(echo $result|jq -M|sed -e 's/:[ ]*\("[a-zA-Z0-9\. <>=&|~^\/\\:@_+-]*"[ ]*,\{0,1\}\)//g;s/:[ ]*true,\{0,1\}//g;s/:[ ]*false,\{0,1\}//g;s/{//g;s/}//g;'|egrep -v '^$'|sed -e 's/\ //g;'|sed -e 's/^[ ]*\([a-zA-Z0-9 \/@_-]\)/'"${root}"'.\1/g');do
-		#echo "[debug] key: $root.$key">&2
+		debug "key: $root.$key">&2
 		echo $root.$key
 	done
 else
-	#echo "[debug] json:$json" 
+	debug "json:$json" 
 	for key in $(expandJSONKeys "${result}");do
-		#echo "[debug] json key($root$key)">&2
-		hasValue=$(echo "$json"|jq -cM "${root}${key}") 
-		#echo "[debug] json key($root$key): $hasValue: $(echo "$json"|jq -cM ${root}${key} )" >&2
+		debug "json expandJSONKey key($root$key)"
+		hasValue=$(echo "$json"|jq -cM "${root}${key}" 2>/dev/null) 
+		debug "json expandJSONKey2 key($root$key): $hasValue: $(echo "'"${json}"'"|jq -cM "${root}${key}" 2>/dev/null )" 
+		#debug "json expandJSONKey2 key($root$key): $hasValue: $(echo "'"${json}"'"|jq -cM ${root}${key} 2>/dev/null)" >&2
 		echo "$hasValue" |egrep '{|}'>/dev/null \
 		&& expandJSONKeys "$(echo $json|jq -cM "${root}${key}")" "${root}${key}" \
 		|| (echo "$root$key" )
 	done
 fi
-#echo [debug] exitCallExpand>&2
+debug exitCallExpand>&2
 }
 
 json2property(){
