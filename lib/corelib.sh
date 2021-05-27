@@ -209,9 +209,28 @@ local pathcount=$(echo $filepath|wc -l)
 
 foreach(){
 local cmd="$@"
-  for repo in $(ls -1); do 
-  	eval "$(echo $cmd | sed -e 's/{}/'$repo'/g')";
-  done;
+  debug "foreach param: $@"
+  if [ "${1}" = "help" -o "${1}" = "-h" -o "${1}" = "--help" ]; then
+	cat <<-EOF 
+		Does a foreach directory -1 level deep- and runs it.
+		A self repository name replacement is going to be done with {}.
+		i.e. foreach 'basename {}' is going to print each directory name.
+		i.e. foreach '[ -f "{}/pom.xml" ] && echo {} is java repo' is going to print those repos who as pom.xml.
+	EOF
+	return 1
+  fi
+  for repo in $(find . -type d -maxdepth 1 -mindepth 1|sed -e 's/\.\///g'|sort); do 
+  	local cmdToRun="$(echo ${cmd} | sed -e 's/{}/'"${repo}"'/g')";
+	debug "Going to run '$cmdToRun' on '${repo}'"
+  	local output=$(eval "$(echo ${cmd} | sed -e 's/{}/'$repo'/g')");
+	local result=$?
+  	#eval "$(echo ${cmd} | sed -e 's/{}/'$repo'/g')";
+	  if [ $result -ne 0 ]; then
+	  	warn "'$cmdToRun' ($result): $output"
+	  else
+		echo ${output}
+      fi
+  done |grep -v '^$'
 }; 
 
 debug "Imported coreLib" 
