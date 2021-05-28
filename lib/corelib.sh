@@ -33,7 +33,7 @@ local params=$(isDebug && echo "$(__escapebash $@)" || echo $@)
 
 __escapebash(){
 local data="$@"
-local escapePattern='s/\([\\$ "\;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\'"'"'/g'
+local escapePattern='s/\([\\$\/ "\;\*]\)/\\\1/g ;s/\[/\\\[/g ;s/\]/\\\]/g ;s/'"'"'/\\'"'"'/g'
 [ "$data"x = x ] \
 	&& sed -e "${escapePattern}" \
 	|| echo "$data" | sed -e "${escapePattern}" \
@@ -41,6 +41,12 @@ local escapePattern='s/\([\\$ "\;\*]\)/\\\1/g;s/\[/\\\[/g;s/\]/\\\]/g;s/'"'"'/\\
 }; 
 
 testescape(){
+	v='/';e='\\\/'
+	a=$(__escapebash "$v") \
+		&& [ "$a" = "$e" ] \
+		&& [ $(echo $a| wc -c) -eq $(echo $e|wc -c) ] \
+		&& info escaping $v '->' $a '('$(echo $a| wc -c)'|'$(echo $e|wc -c)')' ok \
+		|| error escaping $v - $a = $e
 	v='\';e='\\\\'
 	a=$(__escapebash "$v") \
 		&& [ "$a" = "$e" ] \
@@ -208,27 +214,50 @@ local pathcount=$(echo $filepath|wc -l)
 }; 
 
 foreach(){
-local cmd="$@"
   debug "foreach param: $@"
   if [ "${1}" = "help" -o "${1}" = "-h" -o "${1}" = "--help" ]; then
 	cat <<-EOF 
 		Does a foreach directory -1 level deep- and runs it.
 		A self repository name replacement is going to be done with {}.
-		i.e. foreach 'basename {}' is going to print each directory name.
+		i.e. foreach dir1 file1 -- 'basename {}' is going to print each directory name.
+		i.e. foreach 'echo dir1 file2 | basename {} ' is going to print each directory name.
 		i.e. foreach '[ -f "{}/pom.xml" ] && echo {} is java repo' is going to print those repos who as pom.xml.
 	EOF
 	return 1
   fi
-  for repo in $(find . -type d -maxdepth 1 -mindepth 1|sed -e 's/\.\///g'|sort); do 
-  	local cmdToRun="$(echo ${cmd} | sed -e 's/{}/'"${repo}"'/g')";
+  #for repo in $(find . -type d -maxdepth 1 -mindepth 1|sed -e 's/\.\///g'|sort); do 
+	local list;
+	local cmd;
+	local listPopulated="false"
+	if echo "$@" | grep -e '.*--.*' ; then
+		for param in $@; do
+			require param 
+			if [ "$param" = "--" ]; then
+				listPopulated="true"
+			else
+				if [ "$listPopulated" = "false" ]; then
+					list="$list $param"
+				else
+					cmd="$cmd $param "
+				fi
+			fi
+		done
+	else 
+		cmd="$@"
+		list=$(</dev/stdin)
+	fi
+  require list cmd
+  for repo in ${list}; do
+    debug "repo: $repo $(__escapebash ${repo})"
+  	local cmdToRun="$(echo ${cmd} | sed -e 's/{}/'"$(echo ${repo}|sed -e 's/\//\\\//g')"'/g')";
 	debug "Going to run '$cmdToRun' on '${repo}'"
-  	local output=$(eval "$(echo ${cmd} | sed -e 's/{}/'$repo'/g')");
+  	local output=$(eval "$(echo ${cmd} | sed -e 's/{}/'$(echo ${repo}|__escapebash)'/g')");
 	local result=$?
   	#eval "$(echo ${cmd} | sed -e 's/{}/'$repo'/g')";
 	  if [ $result -ne 0 ]; then
 	  	warn "'$cmdToRun' ($result): $output"
 	  else
-		echo ${output}
+		echo -e "${output}"
       fi
   done |grep -v '^$'
 }; 
