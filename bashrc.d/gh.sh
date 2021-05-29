@@ -139,6 +139,7 @@ expandJSONKeys(){
 #set -x
 local json="${1}"
 local root="$2"
+#local keyvalue='["a-zA-Z0-9\. \$&|^~\/@,:_\*\\=<>+-]*|"[a-zA-Z0-9\. \$&|^~\/@,:_\*\\=<>+-]*"\'
 local keyvalue='["a-zA-Z0-9\. \$&|^~\/@,:_\*\\=<>+-]*'
 local obj="{${keyvalue}}[ ]*"
 local keyarray='\['"${keyvalue}"'\][ ]*'
@@ -149,18 +150,23 @@ debug newCallExpand root:\'$root\'
 if [ "$json" = "$result" ] ;then
 	debug json:$json
   debug result:$result 
-	debug json == result TRUE 
-	for key in $(echo $result|jq -M|sed -e 's/:[ ]*\("[a-zA-Z0-9\. <>=&|~^\/\\:@_+-]*"[ ]*,\{0,1\}\)//g;s/:[ ]*true,\{0,1\}//g;s/:[ ]*false,\{0,1\}//g;s/{//g;s/}//g;'|egrep -v '^$'|sed -e 's/\ //g;'|sed -e 's/^[ ]*\([a-zA-Z0-9 \/@_-]\)/'"${root}"'.\1/g');do
+	debug json == result TRUE
+  #isDebug && echo $result|jq -M 1 >/dev/null || error -e "$result"  
+	#for key in $(echo $result|jq -cM|sed -e 's/:[ ]*\("[a-zA-Z0-9\. <>=&|~^\/\\:@_+-]*"[ ]*,\{0,1\}\)//g;s/:[ ]*true,\{0,1\}//g;s/:[ ]*false,\{0,1\}//g;s/{//g;s/}//g;'|egrep -v '^$'|sed -e 's/\ //g;'|sed -e 's/^[ ]*\([a-zA-Z0-9 \/@_-]\)/'"$(echo ${root}|__escapebash)"'.\1/g');do
+	#for key in $(echo $result|jq -cM|sed -e 's/:[ ]*\("[a-zA-Z0-9\. <>=&|~^\/\\:@_+-]*"[ ]*,\{0,1\}\)/ /g;s/:[ ]*true,\{0,1\}/ /g;s/:[ ]*false,\{0,1\}/ /g;s/{//g;s/}/ /g;'|egrep -v '^$'|sed -e 's/^[ ]*\([a-zA-Z0-9 \/@_-]\)/'"${root}"'.\1/g');do
+#	for key in $(echo $result|jq -cM|sed -e 's/:[ ]*\("[a-zA-Z0-9\. <>=&|~^\/\\:@_+-]*"[ ]*,\{0,1\}\)/ /g;s/:[ ]*true,\{0,1\}/ /g;s/:[ ]*false,\{0,1\}/ /g;s/{//g;s/}/ /g;'|egrep -v '^$'|sed -e 's/^[ ]*\([a-zA-Z0-9 \/@_-]\)/'"${root}"'.\1/g');do
+	for key in $(echo $result|jq -cM| grep -oe '"[a-zA-Z0-9\. $/@_+-]\+"[ ]*:'|sed -e 's/[ ]*://g'); do
 		debug "key: $root.$key">&2
 		echo $root.$key
 	done
 else
 	debug "json:$json" 
 	for key in $(expandJSONKeys "${result}");do
-		debug "json expandJSONKey key($root$key)"
+		debug "json expandJSONKey root: $root,key: $key, together: $root$key"
 		hasValue=$(echo "$json"|jq -cM "${root}${key}" 2>/dev/null) 
 		debug "json expandJSONKey2 key($root$key): $hasValue: $(echo "'"${json}"'"|jq -cM "${root}${key}" 2>/dev/null )" 
 		#debug "json expandJSONKey2 key($root$key): $hasValue: $(echo "'"${json}"'"|jq -cM ${root}${key} 2>/dev/null)" >&2
+    isDebug && echo $json|jq -cM 1 >/dev/null || (error "on sub call result: $result" || error "json: $json")  
 		echo "$hasValue" |egrep '{|}'>/dev/null \
 		&& expandJSONKeys "$(echo $json|jq -cM "${root}${key}")" "${root}${key}" \
 		|| (echo "$root$key" )
@@ -172,10 +178,15 @@ debug exitCallExpand>&2
 json2property(){
 local file=$1
 local filedata=$(cat $file)
-for key in $(expandJSONKeys "$(echo "$filedata"|jq -cM .)");do
-        debug "key: $key"
-        echo "$key=$(echo "$filedata"|jq "$key")";
+local old_ifs=$IFS
+export IFS=' 
+'
+for key in $(expandJSONKeys "$(echo "$filedata"|jq -cM)");do
+        local value="$key=$(echo "$filedata"|jq "$key")";
+        debug "key: $key value: $value"
+        echo -e ${value}
 done
+export IFS=$old_ifs
 }
 
 
@@ -185,6 +196,7 @@ value=value-capture-us-east-1-285453578300;
 searchKey=BUCKET
 poskey=.value;
 
+debug "Repo Search"
 for file in $(find value-capture/ POD-Inc/ -name 'config.json'); do 
 	realKeys=$(grep $searchKey $file|cut -d':' -f1|sort -u |sed -e 's/"//g;s/^[ ]*//g')
 	jq -cM . | sed -e 's/:[ ]*\({["a-zA-Z0-9+\/=\. ,:_-]*}\)/: "removedObject"/g'|jq
@@ -256,6 +268,7 @@ case $opt in
       IFS=$OLD_IFS
     ;;
   json2property)
+      debug "file: $1"
       json2property $1
     ;;
   *)
