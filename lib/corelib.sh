@@ -229,7 +229,7 @@ foreach(){
 	local list;
 	local cmd;
 	local listPopulated="false"
-	if echo "$@" | grep -e '.*--.*' ; then
+	if echo "$@" | grep -e '.* -- .*' ; then
 		for param in $@; do
 			require param 
 			if [ "$param" = "--" ]; then
