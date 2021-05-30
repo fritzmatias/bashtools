@@ -127,8 +127,8 @@ local stack=${FUNCNAME[*]}
 local re='^-?[0-9]+$'
 
 	[[ $err =~ $re ]] && shift || err=1
-        __format "${red}[ERROR: ${FUNCNAME[1]} ] $@  ${darkgray}([STACK] ${stack// /:})${default}" >&2
-        return $err
+    __format "${red}[ERROR: ${FUNCNAME[1]} ] $@  ${darkgray}([STACK] ${stack// /:})${default}" >&2
+    return $err
 };
 
 fatal(){
@@ -248,8 +248,8 @@ foreach(){
 	fi
   require list cmd
   for repo in ${list}; do
-    debug "repo: $repo $(__escapebash ${repo})"
-  	local cmdToRun="$(echo ${cmd} | sed -e 's/{}/'"$(echo ${repo}|sed -e 's/\//\\\//g')"'/g')";
+    debug "repo: $repo $(echo $(echo ${repo}|__escapebash))"
+  	local cmdToRun="$(echo ${cmd} | sed -e 's/{}/'"$(echo ${repo}|__escapebash)"'/g')";
 	debug "Going to run '$cmdToRun' on '${repo}'"
   	local output=$(eval "$(echo ${cmd} | sed -e 's/{}/'$(echo ${repo}|__escapebash)'/g')");
 	local result=$?

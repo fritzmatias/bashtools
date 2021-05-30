@@ -151,10 +151,6 @@ if [ "$json" = "$result" ] ;then
 	debug json:$json
   debug result:$result 
 	debug json == result TRUE
-  #isDebug && echo $result|jq -M 1 >/dev/null || error -e "$result"  
-	#for key in $(echo $result|jq -cM|sed -e 's/:[ ]*\("[a-zA-Z0-9\. <>=&|~^\/\\:@_+-]*"[ ]*,\{0,1\}\)//g;s/:[ ]*true,\{0,1\}//g;s/:[ ]*false,\{0,1\}//g;s/{//g;s/}//g;'|egrep -v '^$'|sed -e 's/\ //g;'|sed -e 's/^[ ]*\([a-zA-Z0-9 \/@_-]\)/'"$(echo ${root}|__escapebash)"'.\1/g');do
-	#for key in $(echo $result|jq -cM|sed -e 's/:[ ]*\("[a-zA-Z0-9\. <>=&|~^\/\\:@_+-]*"[ ]*,\{0,1\}\)/ /g;s/:[ ]*true,\{0,1\}/ /g;s/:[ ]*false,\{0,1\}/ /g;s/{//g;s/}/ /g;'|egrep -v '^$'|sed -e 's/^[ ]*\([a-zA-Z0-9 \/@_-]\)/'"${root}"'.\1/g');do
-#	for key in $(echo $result|jq -cM|sed -e 's/:[ ]*\("[a-zA-Z0-9\. <>=&|~^\/\\:@_+-]*"[ ]*,\{0,1\}\)/ /g;s/:[ ]*true,\{0,1\}/ /g;s/:[ ]*false,\{0,1\}/ /g;s/{//g;s/}/ /g;'|egrep -v '^$'|sed -e 's/^[ ]*\([a-zA-Z0-9 \/@_-]\)/'"${root}"'.\1/g');do
 	for key in $(echo $result|jq -cM| grep -oe '"[a-zA-Z0-9\. $/@_+-]\+"[ ]*:'|sed -e 's/[ ]*://g'); do
 		debug "key: $root.$key">&2
 		echo $root.$key
@@ -164,9 +160,9 @@ else
 	for key in $(expandJSONKeys "${result}");do
 		debug "json expandJSONKey root: $root,key: $key, together: $root$key"
 		hasValue=$(echo "$json"|jq -cM "${root}${key}" 2>/dev/null) 
-		debug "json expandJSONKey2 key($root$key): $hasValue: $(echo "'"${json}"'"|jq -cM "${root}${key}" 2>/dev/null )" 
+		debug "json expandJSONKey key($root$key): $hasValue: $(echo "'"${json}"'"|jq -cM "${root}${key}" 2>/dev/null )" 
 		#debug "json expandJSONKey2 key($root$key): $hasValue: $(echo "'"${json}"'"|jq -cM ${root}${key} 2>/dev/null)" >&2
-    isDebug && echo $json|jq -cM 1 >/dev/null || (error "on sub call result: $result" || error "json: $json")  
+    isDebug && (echo $json|jq -cM 1>/dev/null || (error "on sub call result: $result" || error "json: $json"))  
 		echo "$hasValue" |egrep '{|}'>/dev/null \
 		&& expandJSONKeys "$(echo $json|jq -cM "${root}${key}")" "${root}${key}" \
 		|| (echo "$root$key" )
