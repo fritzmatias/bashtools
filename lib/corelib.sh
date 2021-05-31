@@ -249,9 +249,9 @@ foreach(){
   require list cmd
   for repo in ${list}; do
     debug "repo: $repo $(echo $(echo ${repo}|__escapebash))"
-  	local cmdToRun="$(echo ${cmd} | sed -e 's/{}/'"$(echo ${repo}|__escapebash)"'/g')";
+  	local cmdToRun="$(echo ${cmd} | sed -e 's/{}/'"$(echo ${repo}|__escapebash)"'/g;s/\\{\\}/{}/g')";
 	debug "Going to run '$cmdToRun' on '${repo}'"
-  	local output=$(eval "$(echo ${cmd} | sed -e 's/{}/'$(echo ${repo}|__escapebash)'/g')");
+  	local output=$(eval "$(echo ${cmdToRun})");
 	local result=$?
   	#eval "$(echo ${cmd} | sed -e 's/{}/'$repo'/g')";
 	  if [ $result -ne 0 ]; then
