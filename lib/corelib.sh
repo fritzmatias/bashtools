@@ -91,6 +91,25 @@ testescape(){
 		|| error escaping $v - $a = $e
 };
 
+tracelogEnabled(){
+	LOGLEVEL="trace" 
+};
+isTracelog(){
+	[ "$LOGLEVEL" = "trace" ] 
+};
+
+tracelog(){
+local stack=${FUNCNAME[*]}
+local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
+	isTracelog \
+	&& __format "${darkgray}[TRACE: ${FUNCNAME[1]} ]: $@   $([ $LOGSTACK = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
+        return 0
+};
+tracelog "Is enabled"
+
+debugEnabled(){
+	LOGLEVEL="debug" 
+};
 isDebug(){
 	[ "$LOGLEVEL" = "debug" ] || [ "DEBUG" = "true" ]
 };
@@ -98,7 +117,8 @@ isDebug(){
 debug(){
 local stack=${FUNCNAME[*]}
 local filename=$(basename ${BASH_SOURCE[0]} 2>/dev/null||echo source)
-	isDebug \
+	(isDebug \
+        || [ "$LOGLEVEL" = "trace" ]) \
 	&& __format "${darkgray}[DEBUG: ${FUNCNAME[1]} ]: $@   $([ $LOGSTACK = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
         return 0
 };
@@ -107,7 +127,9 @@ debug "Is enabled"
 
 info(){
 local stack=${FUNCNAME[*]}
-        (isDebug || [ "$LOGLEVEL" = "info" ]) \
+        (isDebug\
+        || [ "$LOGLEVEL" = "trace" ] \
+	|| [ "$LOGLEVEL" = "info" ]) \
 	&& __format "${cyan}[INFO: ${FUNCNAME[1]} ]: $@   ${darkgray}$([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
         return 0
 };
@@ -115,6 +137,7 @@ local stack=${FUNCNAME[*]}
 warn(){
 local stack=${FUNCNAME[*]}
         ( isDebug \
+        || [ "$LOGLEVEL" = "trace" ] \
         || [ "$LOGLEVEL" = "info" ] \
         || [ "$LOGLEVEL" = "warn" ]) \
 	&& __format "${yellow}[WARN: ${FUNCNAME[1]} ]: $@  ${darkgray}$([ "$LOGSTACK" = true ] && echo -- [STACK] ${stack// /:} )${default}" >&2
@@ -143,12 +166,13 @@ local re='^-?[0-9]+$'
 
 require(){
 local params;
-        debug "required params: $@"
+        tracelog "required params: $@"
         for tst in $@; do
-            debug $tst:$(eval echo \"\$\{$tst\}\")
-            [ "$(eval echo \$$tst)x" = "x" ] && params="$params $tst" && error "${FUNCNAME[1]}:required '$tst' but is undefined" || debug "Requirement ${FUNCNAME[1]}: $tst, satisfied as: $(eval echo \$$tst)"
+            tracelog $tst: $(eval echo \"\$\{$tst\}\")
+            [ "$(eval echo \$$tst)x" = "x" ] && params="$params $tst" && error "${FUNCNAME[1]}:required '$tst' but is undefined"\
+	    || debug "[ ${FUNCNAME[1]} ]: $tst=$(eval echo \$$tst)"
         done
-        ([ "${#@}" -gt 0 ] && [ "${#params}" -eq 0 ] && debug "${FUNCNAME[1]}:All requirements satisfied") \
+        ([ "${#@}" -gt 0 ] && [ "${#params}" -eq 0 ] && tracelog "${FUNCNAME[1]}:All requirements satisfied") \
             || fatal 1 "${FUNCNAME[1]}:require parameters '$@'" 
 };
 

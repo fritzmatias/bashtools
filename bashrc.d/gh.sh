@@ -22,13 +22,18 @@ checkIfRepoExist(){
   local ghe_repo=${repo[1]}
   local ghe_api_v3_url="https://github.platforms.engineering/api/v3/repos/${ghe_org}/${ghe_repo}?access_token="${access_token}
 
-  local cmd="curl --silent -X GET ${ghe_api_v3_url}"
-  info "Checking if https://github.platforms.engineering/api/v3/repos/${ghe_org}/${ghe_repo} exists"
-  info "$cmd"
-  local checkrepo_api_output=$( eval ${cmd})
-  if [[ `echo $checkrepo_api_output | jq '.message'` == *"Not Found"* ]]; then
-    error 2 "https://github.platforms.engineering/api/v3/repos/${ghe_org}/${ghe_repo} not found"
-  fi
+#  local cmd="curl --silent -X GET ${ghe_api_v3_url}"
+#  info "Checking if https://github.platforms.engineering/api/v3/repos/${ghe_org}/${ghe_repo} exists"
+#  info "$cmd"
+#  local checkrepo_api_output=$( eval ${cmd})
+#  if [ "`echo $checkrepo_api_output | jq '.message'`" == '"Not Found"' ]; then
+#    error 2 "https://github.platforms.engineering/api/v3/repos/${ghe_org}/${ghe_repo} not found"
+#  fi
+
+   local found=$(ghs repositories "$ghe_org/$ghe_repo" 2>/dev/null)
+   info "$found"
+   info  $(echo "$found"|tr ' ' '\n'|wc -l)
+   [ "$(echo "$found"|tr ' ' '\n'|wc -l)" -eq 3 ] || error 2 "ghs repositories $ghe_org/$ghe_repo: $found"
 }
 getConfigFile(){
 local repo="$1"
@@ -267,6 +272,9 @@ case $opt in
       debug "file: $1"
       json2property $1
     ;;
+  checkIfRepoExist)
+	checkIfRepoExist $@
+	;;
   *)
     usage
 esac
