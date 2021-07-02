@@ -28,3 +28,6 @@ export cyan='\e[36m'
 export cyan2='\e[96m'
 export white='\e[97m'
 
+testcolors(){
+ grep -ve '^[ ]*#\|^$'|cut -d' ' -f2|cut -d'=' -f1|foreach 'printf "${{}} test color {} $default"'
+}
