@@ -16,10 +16,12 @@ local realTime=$(resolveTimeToSeconds $time)
 require realTime
 local fileLastUpdate=$(stat -s "$file" |tr ' ' '\n'|grep mtime|cut -d'=' -f2)
 local timeout=500 #seconds before to expiration time
- info $file $time , fileLlastrUupdate: "$fileLastUpdate + offset: $realTime < now: $(date +%s) - $timeout" \
+ info $file $time-${timeout}s , fileLastrUupdate: "$fileLastUpdate + offset: $realTime < now: $(date +%s) - $timeout" \
  && let "$fileLastUpdate + $realTime < $(date +%s) - $timeout" \
  && info $file expired \
- || info $file $(let "remain= - $(date +%s) + $timeout + $fileLastUpdate + $realTime " && echo $remain)s until expiration $realTime && return 1
+ || info $file $(let "remain= - $(date +%s) + $timeout + $fileLastUpdate + $realTime " && echo $remain; \
+	 let h=$remain/3600;let m=\($remain/60\)-\(${h}*60\); let s=${remain}-\(${h}*60\)-\(${m}*60\);  \
+	echo ${h}h${m}m${s}s) until expiration. && return 1
 }
 
 
