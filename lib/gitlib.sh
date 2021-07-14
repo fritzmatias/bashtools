@@ -45,11 +45,11 @@ while ( [ -z "$res" ] || [ "$1"x = "all"x ] ) && [ $i -lt $maxLog ] ; do
     debug "checking which branch contains HEAD~$i - $res - $maxLog "; 
 done
 echo "$res"
-}; export -f gitBranchParent
+};
 
 gitMergeStatus(){
   command git branch --merged | awk '{print $1}' | grep -v '*' | xargs 
-}; export -f gitMergeStatus
+}; 
 
 gitignore(){
 local repoRoot=$(gitRepoLocalRootPath)
@@ -79,12 +79,12 @@ if [[ "$PWD" != "${GITREPOLOCALROOTPATH}" ]]; then
 	export GITREPOLOCALROOTPATH=$(command git rev-parse --show-toplevel 2>/dev/null) ;
 fi 
 echo ${GITREPOLOCALROOTPATH} ;
-}; export -f gitRepoLocalRootPath
+}; 
 
 isGitRepo(){
   command git branch >/dev/null 2>/dev/null 
   return $?
-};export -f isGitRepo
+};
 
 isNotMergeInProgress(){
  git merge HEAD >/dev/null 2>/dev/null
@@ -93,7 +93,7 @@ isNotMergeInProgress(){
 
 gitCurrentBranch(){
   git branch | grep '^*' | colrm 1 2 
-};export -f gitCurrentBranch
+};
 
 urlPath(){
 local url="$1";

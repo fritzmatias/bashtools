@@ -13,7 +13,7 @@
 isGitRepo(){
   command git branch >/dev/null 2>/dev/null 
   return $?
-};export -f isGitRepo
+};
 
 catCache(){
 	git status -s 2>/dev/null
@@ -107,7 +107,7 @@ local escapePattern="\[$data\]"
   [ "$data"x = x ] \
     && echo "" \
     || printf $escapePattern 
-};export -f ps1format
+};
 
 
 if [ "${OLDPS1}"x != "${PS1}"x ]; then
@@ -149,4 +149,4 @@ PS1="${PS1}"' '
 }
 ########################################################################## 
 #gitCacheEnable
-gitCacheDisable
+#gitCacheDisable
